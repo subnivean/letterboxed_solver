@@ -1,0 +1,26 @@
+# Change to the Python virtualenv, then run:
+# ./bin/python.sh -m pip install -r requirements.pip
+
+jupyter
+pyqt5
+
+# This is required to get directory history in IPython
+pickleshare
+
+# If installing Mayavi:
+numpy
+# Mayavi can be fussy about the VTK version
+#vtk
+#vtk==9.2.6
+#mayavi
+
+# If running `msk` modules:
+# Note - you may have to do a `sudo apt install python3.##-dev` in
+# order to build `transformations`, but if you ever want to rebuild
+# the venv from scratch, you'll have to `sudo apt remove` it, then
+# `sudo apt autoremove` to get rid of some shared Python libraries.
+# Otherwise, Mayavi will try to use them, and fail.
+
+#transformations
+#scipy
+
