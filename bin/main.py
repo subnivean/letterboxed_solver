@@ -2,6 +2,10 @@
 generate some possible solutions. Note that the file in WORDLIST
 contains many words not recognized as such by the game, which you can
 add after the letter list to omit from consideration.
+
+NOTE: the letters must be given in this order:
+1. Start at the upper left-hand corner.
+2. Proceed clockwise around the square.
 """
 
 from itertools import combinations, permutations
@@ -10,6 +14,7 @@ import re
 import sys
 
 WORDLIST = "/home/mark/word.list"
+# WORDLIST = "/home/mark/nwl2023_words.list"
 WORDS = Path(WORDLIST).read_text().splitlines()
 
 # Remove words with doubled letters
@@ -46,3 +51,32 @@ for w1, w2 in combos:
 # manually in the puzzle to see if they're "valid".
 for s in sorted(solutions, key=lambda s: len(s[0] + s[1]), reverse=True):
     print(s)
+
+# Find the 'pencil-line' length for each solution
+coords = (
+    (0.2, 1.0),
+    (0.5, 1.0),
+    (0.8, 1.0),
+    (1.0, 0.8),
+    (1.0, 0.5),
+    (1.0, 0.2),
+    (0.8, 0.0),
+    (0.5, 0.0),
+    (0.2, 0.0),
+    (0.0, 0.2),
+    (0.0, 0.5),
+    (0.0, 0.8),
+)
+
+lettercoords = {l: c for l, c in zip(letters, coords)}
+
+totaldists = {}
+for s in solutions:
+    trace = s[0] + s[1][1:]
+    totaldist = 0
+    for l0, l1 in zip(trace[0:-1], trace[1:]):
+        c0x, c0y = lettercoords[l0]
+        c1x, c1y = lettercoords[l1]
+        d = ((c1x - c0x) ** 2 + (c1y - c0y) ** 2) ** 0.5
+        totaldist += d
+    totaldists[s] = totaldist
