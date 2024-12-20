@@ -15,6 +15,7 @@ import re
 import sys
 
 WORDLIST = "/home/mark/word.list"
+NOTAWORDLIST = "../data/notaword.list"
 # WORDLIST = "/home/mark/nwl2023_words.list"
 WORDS = Path(WORDLIST).read_text().splitlines()
 
@@ -22,7 +23,7 @@ WORDS = Path(WORDLIST).read_text().splitlines()
 words = [word for word in WORDS if not re.search(r"([a-z])\1", word)]
 
 # Get command-line arguments
-letters, nonwords = list(sys.argv[1]), sys.argv[2:]
+letters = list(sys.argv[1])
 
 # Find all the words that use only the given letters
 pat = re.compile(f"^[{''.join(letters)}]+$")
@@ -36,7 +37,8 @@ pat = re.compile("|".join(patstr))
 words = [word for word in words if not pat.search(word)]
 
 # Remove words not recognized by the NYT editor
-words = [word for word in words if word not in nonwords]
+nonwords = Path(NOTAWORDLIST).read_text().splitlines()
+words = list(set(words) - set(nonwords))
 
 # Find the 2-word combinations that use all the given letters
 combos = [(w1, w2) for w1, w2 in combinations(words, 2) if len(set(w1 + w2)) == 12]
