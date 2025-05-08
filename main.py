@@ -14,20 +14,23 @@ from pathlib import Path
 import re
 import sys
 
-WORDLIST = "/home/mark/word.list"
-NOTAWORDLIST = "../data/notaword.list"
-# WORDLIST = "/home/mark/nwl2023_words.list"
+# WORDLIST = "/home/mark/word.list"
+NOTAWORDLIST = "data/notaword.list"
+WORDLIST = "/home/mark/nwl2023_words.list"
 WORDS = Path(WORDLIST).read_text().splitlines()
-
-# Remove words with doubled letters, as these can't be played
-words = [word for word in WORDS if not re.search(r"([a-z])\1", word)]
 
 # Get command-line arguments
 letters = list(sys.argv[1])
 
 # Find all the words that use only the given letters
 pat = re.compile(f"^[{''.join(letters)}]+$")
-words = [w for w in words if pat.search(w)]
+allwords = [w for w in WORDS if pat.search(w)]
+
+matchescnt = len(allwords)
+
+# Remove words with doubled letters, as these can't be played
+words = [word for word in allwords if not re.search(r"([a-z])\1", word)]
+doublescnt = len(allwords) - len(words)
 
 # Remove words that have sequences of letters
 # that appear on the same side of the square.
@@ -35,6 +38,8 @@ sides = [letters[0:3], letters[3:6], letters[6:9], letters[9:12]]
 patstr = ["|".join(["".join(l) for l in permutations(side, 2)]) for side in sides]
 pat = re.compile("|".join(patstr))
 words = [word for word in words if not pat.search(word)]
+
+pairingscnt = len(allwords) - len(words) - doublescnt
 
 # Remove words not recognized by the NYT editor
 nonwords = Path(NOTAWORDLIST).read_text().splitlines()
@@ -55,7 +60,7 @@ for w1, w2 in combos:
 # manually in the puzzle to see if they're "valid".
 print("Solutions sorted by letter length")
 for s in sorted(solutions, key=lambda s: len(s[0] + s[1]), reverse=True):
-    print(f"{s!r:30s} {len(s[0] + s[1]):2d}")
+    print(f"{s!r:30s} {len(s[0] + s[1]) - 1:2d}")
 
 # Find the 'pencil-line' length for each solution
 coords = (
@@ -105,3 +110,10 @@ lettercombos = Counter()
 for t in traces:
     for l0, l1 in zip(t[0:-1], t[1:]):
         lettercombos[(l0, l1)] += 1
+
+print()
+print(f"There are {matchescnt} possible words from these letters.")
+print(f"That drops to {matchescnt - doublescnt} when doubled letters are removed.")
+print(
+    f"That drops to {matchescnt - doublescnt - pairingscnt} when disallowed pairings are removed."
+)
